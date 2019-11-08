@@ -19,6 +19,8 @@ User_session.Control_session = Control_session
 Common_session.db = db
 Common_session.pik_db = pik_db
 Hashtag_cloud.db = db
+Control_session.db = db
+
 
 class Bot(Bot_methods):
     """
@@ -26,13 +28,14 @@ class Bot(Bot_methods):
 
     """
     db = db
+    control_chat_id =  -339404157
 
     def __init__(self, token):
         self.last_update = None
         self.token = token
         TelegramRequests.token = token
         self.hashtag_cloud = Hashtag_cloud(self.db)
-        self.control_session = Control_session
+        self.control_session = Control_session(self.control_chat_id, bot=self)
         self.sessions = []
 
     def work(self):
@@ -50,14 +53,20 @@ class Bot(Bot_methods):
         # print(TelegramRequests.send_inline_result(update.query_id, 'test'))
         # if update.chat_id and update.chat_id == Control_session.chat_id:
         #     session = Control_session.create(update, bot=self)
-        if update.text:
-            self.control_session.resend_message(update)
+        # if update.chat_id == self.control_chat_id:
+        #     self.control_session.resend_message(update)
+        session = None
         if not update.is_common_chat:
             session = User_session.create(update, bot=self)
         else:
-            session = Common_session.create(update, bot=self)
-        if session not in self.sessions:
-            self.sessions.append(session)
+            if update.chat_id == self.control_chat_id:
+                print('Попали в работу диспетчера')
+                self.control_session.work(update)
+            else:
+                session = Common_session.create(update, bot=self)
+        if session is not None:
+            if session not in self.sessions:
+                self.sessions.append(session)
 
     def get_updates(self, offset=None, timeout=30):
         """Получает обновления."""

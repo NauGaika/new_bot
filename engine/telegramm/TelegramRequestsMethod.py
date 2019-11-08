@@ -4,7 +4,7 @@ import requests
 
 class TelegramRequestsMethod:
     @classmethod
-    def send_message(cls, chat_id, text, token=None, deley=0, hide_keyboard=True, parsemod_html=False):
+    def send_message(cls, chat_id, text, token=None, deley=0, hide_keyboard=True, parsemod_html=False, buttons=None, inline_buttons=None):
         if cls.token:
             token = cls.token
         params = {'chat_id': chat_id, 'text': text}
@@ -14,13 +14,77 @@ class TelegramRequestsMethod:
             remove_markup = {'remove_keyboard': True}
             remove_markup = json.dumps(remove_markup)
             params.update({'reply_markup': remove_markup})
+        else:
+            if buttons is not None:
+                if isinstance(buttons, list):
+                    buttons = [[{'text': button}] for button in buttons]
+                    buttons_obj = {'keyboard': buttons}
+                    buttons_obj = json.dumps(buttons_obj)
+                    params.update({'reply_markup': buttons_obj})
+            if inline_buttons is not None:
+                if isinstance(inline_buttons, list):
+                    buttons = [[{'text': button, 'callback_data': button}] for button in inline_buttons]
+                    buttons_obj = {'inline_keyboard': buttons}
+                    buttons_obj = json.dumps(buttons_obj)
+                    params.update({'reply_markup': buttons_obj})
+
         api_url = "https://api.telegram.org/bot{}/".format(token)
         method = 'sendMessage'
         resp = requests.post(api_url + method, params)
         resp = resp.json()
+        if 'result' in resp.keys():
+            resp = resp['result']
+        else:
+            print(resp)
         if deley:
             cls.delete_message(chat_id, resp['message_id'], deley=deley, token=token)
             return
+        return resp
+
+    @classmethod
+    def edit_message_text(cls, chat_id, message_id, text, inline_keyboard=None, parsemod_html=False):
+        params = {'chat_id': chat_id, 'message_id': message_id, 'text': text}
+        if parsemod_html:
+            params.update({'parse_mode': 'HTML'})
+        if inline_keyboard is not None:
+            buttons = [[{'text': button, 'callback_data': button}] for button in inline_keyboard]
+            buttons_obj = {'inline_keyboard': buttons}
+            buttons_obj = json.dumps(buttons_obj)
+            params.update({'reply_markup': buttons_obj})
+        api_url = "https://api.telegram.org/bot{}/".format(cls.token)
+        method = 'editMessageText'
+        resp = requests.post(api_url + method, params)
+        resp = resp.json()
+        if 'result' in resp.keys():
+            resp = resp['result']
+        else:
+            print(resp)
+        return resp
+
+    @classmethod
+    def edit_message_reply_markup(cls, chat_id, message_id, token=None,  hide_keyboard=True, buttons=None, inline_buttons=None):
+        if cls.token:
+            token = cls.token
+        params = {'chat_id': chat_id, 'message_id': message_id}
+        if hide_keyboard:
+            remove_markup = json.dumps({'inline_keyboard': [[]]})
+            params.update({'reply_markup': remove_markup})
+        else:
+            if buttons is not None:
+                if isinstance(buttons, list):
+                    buttons = [[{'text': button}] for button in buttons]
+                    buttons_obj = {'keyboard': buttons}
+                    buttons_obj = json.dumps(buttons_obj)
+                    params.update({'reply_markup': buttons_obj})
+            if inline_buttons is not None:
+                if isinstance(inline_buttons, list):
+                    buttons = [[{'text': button, 'callback_data': button}] for button in inline_buttons]
+                    buttons_obj = {'inline_keyboard': buttons}
+                    buttons_obj = json.dumps(buttons_obj)
+                    params.update({'reply_markup': buttons_obj})
+        api_url = "https://api.telegram.org/bot{}/".format(token)
+        method = 'editMessageReplyMarkup'
+        resp = requests.post(api_url + method, params)
         return resp
 
     @classmethod

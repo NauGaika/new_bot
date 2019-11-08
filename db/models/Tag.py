@@ -1,7 +1,7 @@
-from sqlalchemy import Column, Integer, String, Table, ForeignKey, Float, MetaData
+from sqlalchemy import Column, Integer, String, Table, ForeignKey, Float, MetaData, and_
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
-from . import Instruction
+from .Instruction import Instruction
 
 Session = __builtins__['Session']
 Base = __builtins__['Base']
@@ -53,10 +53,10 @@ class Tag(Base):
                 tags_with_wage = {i: def_wage for i in tags_with_wage}
 
             if instruction_id is not None:
-                instruction = session.query('instructions').filter_by(id=instruction_id).one()
+                instruction = session.query(Instruction).filter_by(id=instruction_id).one()
             all_instruction_associations = set()
             for i in instruction.tags:
-                all_instruction_associations.add(i.tag)
+                all_instruction_associations.add(i.tag.tag)
             # print(all_instruction_associations)
             for i in tags_with_wage.keys():
                 if i not in all_tags.keys():
@@ -99,3 +99,27 @@ class Tag(Base):
             else:
                 not_exists.append(i)
         return exists, not_exists
+
+    @classmethod
+    def add_new_keywords_to_instruction(cls, instruction, tags, session=None):
+        if session is not None:
+            for tag in tags:
+                res = session.query(cls).filter_by(tag=tag)
+                if res.count():
+                    cur_tag = res.one()
+                    is_add = False
+                else:
+                    cur_tag = cls(tag)
+                    is_add = True
+                if not is_add:
+                    print(cur_tag)
+                    print(instruction)
+                    res_2 = session.query(Instruction_association).filter_by(tag_id=cur_tag.id).filter_by(instruction_id=instruction.id)
+                if not is_add and res_2.count():
+                    res_2 = res_2.one()
+                    res_2.wage += 0.03
+                else:
+                    ass = Instruction_association(wage=0.03)
+                    ass.instruction = instruction
+                    ass.tag = cur_tag
+        session.commit()

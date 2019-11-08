@@ -1,7 +1,7 @@
 import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from .Tag import Tag
+# from .Tag import Tag
 import pandas as pd
 import numpy as np
 
@@ -35,7 +35,7 @@ class Instruction(Base):
             result = {}
             res = session.query(cls.id, cls.title, cls.link).all()
             for i in res:
-                result.setdefault(i.id, {'title': i.title, 'link': i.link})
+                result.setdefault(int(i.id), {'title': i.title, 'link': i.link})
             cls.all_links = result
             print("Загрузили ссылки из базы")
         return cls.all_links
@@ -74,12 +74,21 @@ class Instruction(Base):
     def get_big_data(cls):
         session = Session()
         instructions = session.query(cls).all()
-        tags = session.query(Tag).all()
-        instructions = {instruction.id: {tag.tag: tag.wage for tag in instruction.tags} for instruction in instructions}
-        tags = [tag.tag for tag in tags]
+        instructions = {instruction.id: {tag.tag.tag: tag.wage for tag in instruction.tags} for instruction in instructions}
+        tags = set()
+        for i in instructions.values():
+            for b in i.keys():
+                tags.add(b)
         arr = np.zeros((len(instructions.keys()), len(tags)))
         df = pd.DataFrame(data=arr, index=instructions.keys(), columns=tags)
         for i in instructions.keys():
             for b in instructions[i].keys():
                 df[b][i] = instructions[i][b]
         return df
+
+    @classmethod
+    def get_by_link(cls, link):
+        session = Session()
+        res = session.query(cls).filter_by(link=link)
+        if res.count():
+            return res.one(), session

@@ -3,9 +3,15 @@ class TelegramRequestsProperty:
     @property
     def message_id(self):
         """Id сообщения."""
-        if 'message_id' in self.obj:
+        if 'message_id' in self.obj.keys():
             return self.obj['message_id']
-        return self.obj['message']['message_id']
+        elif 'message' in self.obj.keys():
+            return self.obj['message']['message_id']
+        elif 'callback_query' in self.obj.keys():
+            if 'message' in self.obj['callback_query'].keys():
+                if 'message_id' in self.obj['callback_query']['message'].keys():
+                    return self.obj['callback_query']['message']['message_id']
+
 
     @property
     def sender_id(self):
@@ -82,6 +88,9 @@ class TelegramRequestsProperty:
                 return self.obj['message']['text']
         elif 'edited_message' in self.obj.keys():
             return self.obj['edited_message']['text']
+        elif 'text' in self.obj.keys():
+            return self.obj['text']
+
 
     @property
     def update_id(self):

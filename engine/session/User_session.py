@@ -3,6 +3,7 @@ from .User_session_info import User_session_info
 from .User_session_instructions import User_session_instructions
 from .User_session_crocotime import User_session_crocotime
 from .User_session_inline import User_session_inline
+from .Control_session import Control_session
 
 
 
@@ -13,21 +14,21 @@ class User_session(User_session_info, User_session_instructions, User_session_cr
 
     @classmethod
     def create(cls, upd, bot=None):
-        if upd.chat_id not in cls.user_sessions.keys():
-            cls.user_sessions.setdefault(upd.chat_id, cls(upd, bot=bot))
-        cur_session = cls.user_sessions[upd.chat_id]
+        cur_session = cls.user_sessions.setdefault(upd.chat_id, cls(upd, bot=bot))
         cur_session.messages_all.append(upd)
         # upd.print_obj()
         if not cur_session.all_user_data_is_check:
             cur_session.all_user_data_is_check = cur_session.check_all_user_data()
         if cur_session.all_user_data_is_check:
             # print(upd.inline_data)
+            cur_session.control_session.work(upd)
             cur_session.command_reduser()
         return cur_session
 
     def __init__(self, upd, bot=None):
         self.bot = bot
         self.instruction_question = ""
+        self.control_session = Control_session(upd, bot=bot)
         self.chine = []
         self.user_data = self.db.User.get_user(upd)
         self.current_inline_keypud = None
