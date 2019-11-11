@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Table, ForeignKey, Float, MetaData, and_
+from sqlalchemy import Column, Integer, String, Table, ForeignKey, Float, MetaData, and_ , func
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.associationproxy import association_proxy
 from .Instruction import Instruction
@@ -17,6 +17,24 @@ class Instruction_association(Base):
     instruction = relationship("Instruction", backref="instructions", lazy="joined")
     wage = Column(Float, default=0)
 
+    @classmethod
+    def recalculate_wages(cls, instruction_id=None, session=None, session_commit=True):
+        if session is None:
+            session = Session()
+        if instruction_id is None:
+            res = session.query(cls.instruction_id, func.sum(cls.wage), func.count(cls.wage)).group_by(cls.instruction_id)
+            instructions = res.all()
+        else:
+            res = session.query(cls.instruction_id, func.sum(cls.wage), func.count(cls.wage)).filter_by(instruction_id=instruction_id)
+            instructions = res.all()
+        for instruction_id, summ, count in instructions:
+            res = session.query(cls).filter_by(instruction_id=instruction_id).all()
+            for ta in res:
+                ta.wage = ta.wage / summ * count
+        if session_commit:
+            session.commit()
+        else:
+            return session
 
 class Tag(Base):
     __tablename__ = 'tags'
@@ -69,7 +87,9 @@ class Tag(Base):
                     assa = Instruction_association(wage=tags_with_wage[i])
                     assa.tag = cur_tag
                     assa.instruction = instruction
+
         session.commit()
+        Instruction_association.recalculate_wages()
 
     @classmethod
     def get_all_hashtag(cls):
@@ -119,7 +139,8 @@ class Tag(Base):
                     res_2 = res_2.one()
                     res_2.wage += 0.03
                 else:
-                    ass = Instruction_association(wage=0.03)
+                    ass = Instruction_association(wage=0.01)
                     ass.instruction = instruction
                     ass.tag = cur_tag
         session.commit()
+        Instruction_association.recalculate_wages()

@@ -11,8 +11,9 @@ from .Tag import Tag
 from .Plasure import Plasure
 from .Department import Department
 from .Position import Position
+from .Tag import Instruction_association
 
 
 
 
-__all__ = ['Department', 'Position', 'User', 'Instruction', 'Tag', 'Common_parameter', 'Plasure']
+__all__ = ['Department', 'Position', 'User', 'Instruction', 'Tag', 'Common_parameter', 'Plasure', 'Instruction_association']

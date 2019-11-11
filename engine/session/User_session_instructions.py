@@ -146,15 +146,17 @@ class User_session_instructions:
                 # print(obj.text)
                 self.text_query += ' ' + obj.text
                 cur_text = pd.Series(list(self.get_instruction_words_wage(obj.text).keys()))
-                # print(cur_text)
+                print(cur_text)
                 if not cur_text.empty:
                     cur_text = cur_text[cur_text.isin(self.instruction_big_data.columns)]
+                    res = self.instruction_big_data
                     res = self.instruction_big_data.filter(items=cur_text, axis=1)
                     res['summ'] = res.sum(axis=1)
                     res = res[res['summ'] > 0]
                     res = res.sort_values(by=['summ'], ascending=False)
                     print(self.text_query)
-                    length = len(res)
+                    print(res)
+                    # length = len(res)
                     res_limit = res.head(5)
                     instructions = self.db.Instruction.get_by_list_ids(list(res_limit.index))
                     cur_message = ""
@@ -180,8 +182,8 @@ class User_session_instructions:
                 self.status = ["", ""]
                 self.chine = []
                 self.current_command = ''
-                self.prev_instruction_message = None
                 TelegramRequests.edit_message_reply_markup(self.user_id, self.prev_instruction_message.message_id)
+                self.prev_instruction_message = None
             elif obj.inline_data == "Статья не найдена":
                 TelegramRequests.send_message(self.user_id, 'Отправляем запрос координатору. Скоро вам ответят в этом чате')
                 self.bot.control_session.request_instruction(self.instruction_question, self.text_query)
@@ -218,39 +220,39 @@ class User_session_instructions:
                 #             self.cur_message += '<a href="{}">{}</a>\n\n'.format(link, title)
                 #         TelegramRequests.edit_inline_keypud(self.user_id, self.current_inline_keypud.message_id, self.cur_message, parsemod_html=True, reject_text="Статья не найдена", confim_text="Статья найдена")
                 # if obj.inline_data in res.keys():
-                    # print(res.keys())
-                    # self.chine.append(obj.inline_data)
-                    # res = self.bot.hashtag_cloud.get_hashtag_with_links(self.bot.hashtag_cloud.link_data, parameter_confims=self.chine)
-                    # if type(res) != list:
-                    #     tags = {i: res[i] for i in res.keys()}
-                    #     all_links = []
-                    #     tt = 10
-                    #     for i in res.values():
-                    #         all_links += i
-                    #     links = self.db.Instruction.get_by_list_ids(all_links)
-                    #     self.cur_message = ""
-                    #     for el in links:
-                    #         if tt == 0:
-                    #             break
-                    #         tt -= 1
-                    #         title = el['title']
-                    #         link = el['link']
-                    #         self.cur_message += '<a href="{}">{}</a>\n\n'.format(link, title)
-                    #     TelegramRequests.edit_inline_keypud(self.user_id, self.current_inline_keypud.message_id, self.cur_message, buttons=tags, parsemod_html=True, confim_text="Статья найдена", reject_text="Статья не найдена",)
-            
+                # print(res.keys())
+                # self.chine.append(obj.inline_data)
+                # res = self.bot.hashtag_cloud.get_hashtag_with_links(self.bot.hashtag_cloud.link_data, parameter_confims=self.chine)
+                # if type(res) != list:
+                #     tags = {i: res[i] for i in res.keys()}
+                #     all_links = []
+                #     tt = 10
+                #     for i in res.values():
+                #         all_links += i
+                #     links = self.db.Instruction.get_by_list_ids(all_links)
+                #     self.cur_message = ""
+                #     for el in links:
+                #         if tt == 0:
+                #             break
+                #         tt -= 1
+                #         title = el['title']
+                #         link = el['link']
+                #         self.cur_message += '<a href="{}">{}</a>\n\n'.format(link, title)
+                #     TelegramRequests.edit_inline_keypud(self.user_id, self.current_inline_keypud.message_id, self.cur_message, buttons=tags, parsemod_html=True, confim_text="Статья найдена", reject_text="Статья не найдена",)
+        
 
 
-                    #     links = self.db.Instruction.get_by_list_ids(res)
-                    #     self.cur_message = ""
-                    #     tt = 10
-                    #     for el in links:
-                    #         if tt == 0:
-                    #             break
-                    #         tt -= 1
-                    #         title = el['title']
-                    #         link = el['link']
-                    #         self.cur_message += '<a href="{}">{}</a>\n\n'.format(link, title)
-                    #     TelegramRequests.edit_inline_keypud(self.user_id, self.current_inline_keypud.message_id, self.cur_message, parsemod_html=True, reject_text="Статья не найдена", confim_text="Статья найдена")
+                #     links = self.db.Instruction.get_by_list_ids(res)
+                #     self.cur_message = ""
+                #     tt = 10
+                #     for el in links:
+                #         if tt == 0:
+                #             break
+                #         tt -= 1
+                #         title = el['title']
+                #         link = el['link']
+                #         self.cur_message += '<a href="{}">{}</a>\n\n'.format(link, title)
+                #     TelegramRequests.edit_inline_keypud(self.user_id, self.current_inline_keypud.message_id, self.cur_message, parsemod_html=True, reject_text="Статья не найдена", confim_text="Статья найдена")
 
     def get_instruction_words_wage(self, text):
         res = {}

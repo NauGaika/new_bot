@@ -18,7 +18,7 @@ class User_session_crocotime:
     def get_prev_week(self):
         """Получаем информацию крокотайма за предыдущую неделю."""
         res = self.pik_db.CrocoTime.get_prev_week(self.user_data.pik_id)
-        if res:
+        if res and res['PermittedHours']:
             message = """
     За неделю вы отработали {} часов
     Из них {} - продуктивные
