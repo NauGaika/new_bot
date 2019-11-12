@@ -41,6 +41,11 @@ class Instruction(Base):
         return cls.all_links
 
     @classmethod
+    def clear_memory(cls):
+        cls.all_links = None
+        print("Очистили память базы")
+
+    @classmethod
     def create_new(cls, title, link, user):
         session = Session()
         el = cls(title, link, user)

@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:///test.db', echo=False)
+engine = create_engine('sqlite:///G:\\Мой диск\\new_bot\\for_test.db', echo=False)
 Session = sessionmaker(bind=engine)
 
 __builtins__.setdefault('Session', Session)

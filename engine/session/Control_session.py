@@ -53,20 +53,17 @@ class Control_session(Control_session_instructions):
             self.status = ['', '']
         elif upd.resend_message_id in self.instruction_requests.keys():
             text = upd.text
-            if '#link' in upd.hashtags:
-                self.status = ['request_instruction', '']
-                text = text.replace('#link', '')
-                text = text.strip()
-                self.instruction_to_send.setdefault(upd.sender_id,
-                    {
-                        'link': text,
-                        'title': '',
-                        'chat_id': self.instruction_requests[upd.resend_message_id][1],
-                        'text': self.instruction_requests[upd.resend_message_id][2]
-                    })
-                self.work(upd)
-            else:
-                TelegramRequests.send_message()
+            self.status = ['request_instruction', '']
+            text = text.replace('#link', '')
+            text = text.strip()
+            self.instruction_to_send.setdefault(upd.sender_id,
+                {
+                    'link': text,
+                    'title': '',
+                    'chat_id': self.instruction_requests[upd.resend_message_id][1],
+                    'text': self.instruction_requests[upd.resend_message_id][2]
+                })
+            self.work(upd)
 
 
     @classmethod

@@ -19,6 +19,7 @@ class Instruction_association(Base):
 
     @classmethod
     def recalculate_wages(cls, instruction_id=None, session=None, session_commit=True):
+        return session
         if session is None:
             session = Session()
         if instruction_id is None:
@@ -137,9 +138,9 @@ class Tag(Base):
                     res_2 = session.query(Instruction_association).filter_by(tag_id=cur_tag.id).filter_by(instruction_id=instruction.id)
                 if not is_add and res_2.count():
                     res_2 = res_2.one()
-                    res_2.wage += 0.03
+                    res_2.wage += 1
                 else:
-                    ass = Instruction_association(wage=0.01)
+                    ass = Instruction_association(wage=1)
                     ass.instruction = instruction
                     ass.tag = cur_tag
         session.commit()

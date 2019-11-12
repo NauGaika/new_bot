@@ -18,7 +18,7 @@ User_session.pik_db = pik_db
 User_session.Control_session = Control_session
 Common_session.db = db
 Common_session.pik_db = pik_db
-Hashtag_cloud.db = db
+# Hashtag_cloud.db = db
 Control_session.db = db
 
 
@@ -34,7 +34,7 @@ class Bot(Bot_methods):
         self.last_update = None
         self.token = token
         TelegramRequests.token = token
-        self.hashtag_cloud = Hashtag_cloud(self.db)
+        # self.hashtag_cloud = Hashtag_cloud(self.db)
         self.control_session = Control_session(self.control_chat_id, bot=self)
         self.sessions = []
 
